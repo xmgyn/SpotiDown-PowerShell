@@ -88,11 +88,8 @@ foreach ($line in $lines) {
     Write-Host -ForegroundColor Cyan "Running Check..."
 
     try {
-        $songN = '.\Downloads\' + $songDetails.'Song'+'.mp3'
-        #$songName = $songDetails.'Song' + '.mp3'
         $currentLocation = Get-Location
         $currentLocation = Join-Path -Path $currentLocation -ChildPath "Downloads"
-        #Get-ChildItem -Recurse -Name ".\Downloads\out $counter.mp3" -ErrorAction Stop
         $objFolder = (New-Object -ComObject Shell.Application).NameSpace($currentLocation)
         $shellfile = $objFolder.parsename("out $counter.mp3")
         $duration = $objFolder.GetDetailsOf($shellfile, 27) 
@@ -102,12 +99,14 @@ foreach ($line in $lines) {
         $minutes, $seconds = ($songDetails.'Time').Split(':')
         $timeSpan = [TimeSpan]::FromMinutes($minutes).Add([TimeSpan]::FromSeconds($seconds))
         $outputString = $timeSpan.ToString('hh\:mm\:ss')
+        $hours0, $minutesO, $secondsO = ($MetaData.'Duration').Split(':')
+        $difference = (([int]$minutesO)*60 + $secondsO)-(([int]$minutes)*60 + $seconds)
 
         Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Song Duration : "$MetaData.'Duration'
         Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Expt Duration : "$outputString
-        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Difference : "
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Difference : "$difference
 
-        if ($outputString -eq $MetaData.'Duration') {
+        if (($outputString -eq $MetaData.'Duration') -And ($difference -le 5) -And ($difference -ge -5)) {
             Write-Host -ForegroundColor Magenta "Audio Was Correct..."
             $target = ".\Downloads\out $counter.mp3"
             $newnameWExt = $songDetails.'Song'
