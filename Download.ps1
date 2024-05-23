@@ -117,13 +117,15 @@ for($x=$no; $x -le $lines.length;$x++) {
         if (($outputString -eq $MetaData.'Duration') -Or (($difference -le 5) -And ($difference -ge -5))) {
             Write-Host -ForegroundColor Green -BackgroundColor Magenta "Audio Was Correct..."
             $target = ".\Downloads\out $counter.mp3"
+            # Make It Short
             $newnameWExt = $songDetails.'Song'
             $cleanedFilename = $newnameWExt.Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
             $artistname = $songDetails.'Artist' -split ",\s*"
             $cleanedartistname = $artistname[0].Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
-            $newname = $cleanedartistname+" - "+ $cleanedFilename + '.mp3'
+            $newname = $cleanedartistname+" - "+ $cleanedFilename
             $limitnamechar = $newname.Substring(0, [System.Math]::Min(80, $newname.Length))
-            Rename-Item -Path $target -NewName $limitnamechar -ErrorAction Stop
+            $limitnamecharWExt = $limitnamechar + '.mp3'
+            Rename-Item -Path $target -NewName $limitnamecharWExt -ErrorAction Stop
         }
         else {
             Remove-Item ".\Downloads\out $counter.mp3" -ErrorAction Stop

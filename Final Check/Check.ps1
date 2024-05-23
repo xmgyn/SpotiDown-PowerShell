@@ -1,28 +1,45 @@
-$path = ".\Song Details.csv"
-$csv = Import-csv -path $path
+# Getting Details.csv
+Try {
+    $filePath = ".\..\Details.csv"
+    $csv = Import-csv -Path $filePath -ErrorAction Stop
+} Catch {
+    Write-Host -ForegroundColor Red "Details.csv Not Found"
+    Write-Host -ForegroundColor Red "Terminating..."
+    Exit
+}
+
+# Creating Report
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+$reportName = "Report_"+$timestamp+".txt"
+New-Item -ItemType File -Path $reportName -Force
+
 $counter = 0
+
 foreach($line in $csv)
 { 
-    Write-Host "------------------------------------------------------"
-    $properties = $line | Get-Member -MemberType Properties
-    $songDetails = New-Object -TypeName PSObject
+    $songDetails = $line
+
+    Write-Host -ForegroundColor Green -BackgroundColor White "------------------------------------------------------"
+        
     $counter++
-    for($i=0; $i -lt $properties.Count;$i++)
-    {
-        $column = $properties[$i]
-        $columnvalue = $line | Select -ExpandProperty $column.Name
-        $songDetails | Add-Member -MemberType NoteProperty -Name $column.Name -Value $columnvalue
-    }
-    Write-Host "Item : "
-    Write-Host $counter
+
+    Write-Host "Item : "$counter
+    $songDetails = "Song : "+$songDetails.'Song'+", ID : " +$songDetails.'Spotify Track Id'
     Write-Host $songDetails
-    $text = "Song : " + $songDetails.'Song' +", ID : " +$songDetails.'Spotify Track Id'
+
     try {
-        $songN = '.\Downloads\' + $songDetails.'Song'+'.mp3'
-        Get-ChildItem -Recurse -Name $songN -ErrorAction Stop
-        $songName = $songDetails.'Song' + '.mp3'
-        $objFolder = (New-Object -ComObject Shell.Application).NameSpace("C:\Users\Mrigayan\Downloads\SpotifyDown\Downloads")
-        $shellfile = $objFolder.parsename($songName)
+        $newnameWOExt = $songDetails.'Song'
+        $cleanedFilename = $newnameWOExt.Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
+        $artistname = $songDetails.'Artist' -split ",\s*"
+        $cleanedartistname = $artistname[0].Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
+        $newname = $cleanedartistname+" - "+ $cleanedFilename + '.mp3'
+        $limitnamechar = $newname.Substring(0, [System.Math]::Min(80, $newname.Length))
+        $limitnamecharWExt = $limitnamechar + '.mp3'
+
+        $currentLocation = Get-Location
+        $currentLocation = Join-Path -Path $currentLocation -ChildPath "..\Downloads"
+        $objFolder = (New-Object -ComObject Shell.Application).NameSpace($currentLocation)
+        $shellfile = $objFolder.parsename($limitnamecharWExt)
         $duration = $objFolder.GetDetailsOf($shellfile, 27) 
         $MetaData = [PSCustomObject]@{
             Duration = $duration
@@ -30,21 +47,25 @@ foreach($line in $csv)
         $minutes, $seconds = ($songDetails.'Time').Split(':')
         $timeSpan = [TimeSpan]::FromMinutes($minutes).Add([TimeSpan]::FromSeconds($seconds))
         $outputString = $timeSpan.ToString('hh\:mm\:ss')
-        Write-Output $MetaData.'Duration'
-        Write-Output $outputString
-        if ($outputString -eq $MetaData.'Duration') {
-            Write-Output "No Errors OK!!!"
-            Move-Item -Path $songN -Destination '.\Downloads\OK' 
+        $hours0, $minutesO, $secondsO = ($MetaData.'Duration').Split(':')
+        $difference = (([int]$minutesO)*60 + $secondsO)-(([int]$minutes)*60 + $seconds)
+
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Song Duration : "$MetaData.'Duration'
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Expt Duration : "$outputString
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Difference : "$difference
+
+        if (($outputString -eq $MetaData.'Duration') -Or (($difference -le 5) -And ($difference -ge -5))) {
+            $songLocation = Join-Path -Path $currentLocation -ChildPath $limitnamecharWExt 
+            Move-Item -Path $songLocation -Destination '..\Downloads\FinalCheckOK' 
+        } else {
+            throw "Length Short..."
         }
-        else {
-            Write-Output "!!! Error !!!"
-            $Desc = $text + "`n"+ "Expected: " + $MetaData.'Duration' + "`n" + "Actual:" + $outputString + "`n"+ "---------------------------------------------"
-            Add-Content -Path '.\Check - Errors.txt' $Desc
-        }
+        Write-Host -ForegroundColor Green "All Good!!!"
     } 
     catch {
-        Write-Host -f Yellow "An error occurred: $_"
-        Write-Host "File Not Found"
-        Add-Content -Path '.\Check - Not Found.txt' $text
+        Write-Host -ForegroundColor Red "!!! Error !!!"
+        Write-Host -f Red "An error occurred: $_"
+        $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "---------------------------------------------"
+        Add-Content -Path $reportName $descrip
     }
 }
