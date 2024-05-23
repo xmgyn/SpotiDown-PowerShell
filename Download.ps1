@@ -3,8 +3,8 @@ Try {
     $filePath = "Details.csv"
     $lines = Import-csv -Path $filePath -ErrorAction Stop
 } Catch {
-    Write-Host -BackgroundColor Red "Details.csv Not Found"
-    Write-Host -BackgroundColor Red "Terminating..."
+    Write-Host -ForegroundColor Red "Details.csv Not Found"
+    Write-Host -ForegroundColor Red "Terminating..."
     Exit
 }
 
@@ -18,8 +18,6 @@ Try {
     [microsoft.win32.registry]::SetValue($RegPath, 'Iter', $counter, [Microsoft.Win32.RegistryValueKind]::DWORD)
 }
 
-Write-Host $counter
-
 # Setting Headers
 $headers = @{
     'Referer' = 'https://spotifydown.com/'
@@ -32,7 +30,7 @@ $reportName = "Report_"+$timestamp+".txt"
 New-Item -ItemType File -Path $reportName -Force
 
 foreach ($line in $lines) {
-    Write-Host -BackgroundColor Green "------------------------------------------------------"
+    Write-Host -ForegroundColor Green -BackgroundColor White "------------------------------------------------------"
     $properties = $line | Get-Member -MemberType Properties
     $songDetails = New-Object -TypeName PSObject
 
@@ -49,33 +47,34 @@ foreach ($line in $lines) {
         $jsonResponse = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
     }
     catch {
-        Write-Host -BackgroundColor Red "Oops Network Error"
-        Write-Host -BackgroundColor Red "Terminating..."
+        Write-Host -ForegroundColor Red "Oops Network Error"
+        Write-Host -ForegroundColor Red "Terminating..."
         Exit
     }
 
+    $status = $jsonResponse.'success'
+
     # Retry If Error
     $timelag = 4
-    while ($jsonResponse.'success' -eq "false" ) {
+    while (!$status) {
         Write-Host "Retrying in $timelag sec..."
         Start-Sleep -Seconds $timelag
         $timelag += 7;
         try {
             $jsonResponse = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
         } catch {
-            Write-Host -BackgroundColor Red "Oops Network Error"
-            Write-Host -BackgroundColor Red "Terminating..."
+            Write-Host -ForegroundColor Red "Oops Network Error"
+            Write-Host -ForegroundColor Red "Terminating..."
             Exit
         }
     }
 
-    Write-Host -BackgroundColor Green "Link Received Successfully"
+    Write-Host -ForegroundColor Green "Link Received Successfully"
 
     # Increment The Counter
     $counter++    
-
-    Write-Host -BackgroundColor Green "Song : " + $songDetails.'Song'
-    Write-Host -BackgroundColor Green "Count : " + $counter
+    Write-Host -ForegroundColor Green "Song : "$songDetails.'Song'
+    Write-Host -ForegroundColor Green "Count : "$counter
     
     # Downloading Audio And Image
     Invoke-WebRequest $jsonResponse.'link' -OutFile ".\Downloads\Audio $counter.mp3" 
@@ -86,14 +85,15 @@ foreach ($line in $lines) {
     & ".\Tool\ffmpeg.exe" -i ".\Downloads\Audio $counter.mp3" -i ".\Downloads\Image $counter.jpg" -map 0:0 -map 1:0 -codec copy -id3v2_version 3 -metadata album=$album_name ".\Downloads\out $counter.mp3"
     
     # Running Check
-    Write-Host -BackgroundColor Cyan "Running Check..."
+    Write-Host -ForegroundColor Cyan "Running Check..."
 
     try {
         $songN = '.\Downloads\' + $songDetails.'Song'+'.mp3'
         #$songName = $songDetails.'Song' + '.mp3'
-
+        $currentLocation = Get-Location
+        $currentLocation = Join-Path -Path $currentLocation -ChildPath "Downloads"
         #Get-ChildItem -Recurse -Name ".\Downloads\out $counter.mp3" -ErrorAction Stop
-        $objFolder = (New-Object -ComObject Shell.Application).NameSpace(".\Downloads")
+        $objFolder = (New-Object -ComObject Shell.Application).NameSpace($currentLocation)
         $shellfile = $objFolder.parsename("out $counter.mp3")
         $duration = $objFolder.GetDetailsOf($shellfile, 27) 
         $MetaData = [PSCustomObject]@{
@@ -103,28 +103,30 @@ foreach ($line in $lines) {
         $timeSpan = [TimeSpan]::FromMinutes($minutes).Add([TimeSpan]::FromSeconds($seconds))
         $outputString = $timeSpan.ToString('hh\:mm\:ss')
 
-        Write-Host -BackgroundColor Blue "Song Duration : "+$MetaData.'Duration'
-        Write-Host -BackgroundColor Blue "Expt Duration : "+$outputString
-        Write-Host -BackgroundColor Blue "Difference : "
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Song Duration : "$MetaData.'Duration'
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Expt Duration : "$outputString
+        Write-Host -ForegroundColor Yellow -BackgroundColor DarkGreen "Difference : "
 
         if ($outputString -eq $MetaData.'Duration') {
-            Write-Output -BackgroundColor Green "All Good!!!"
+            Write-Host -ForegroundColor Magenta "Audio Was Correct..."
             $target = ".\Downloads\out $counter.mp3"
             $newnameWExt = $songDetails.'Song'
             $newname = $newnameWExt + '.mp3'
             Rename-Item -Path $target -NewName $newname -ErrorAction Stop
         }
         else {
-            Remove-Item ".\Downloads\out $counter.jpg" -ErrorAction Stop
+            Remove-Item ".\Downloads\out $counter.mp3" -ErrorAction Stop
             throw "Audio Was A Chunk..."
         }
+        Write-Host -ForegroundColor Magenta "Cleaning..."
         Remove-Item ".\Downloads\Audio $counter.mp3", ".\Downloads\Image $counter.jpg" -ErrorAction Stop
+        Write-Host -ForegroundColor Green "All Good!!!"
     }
     catch {
+        Write-Host -ForegroundColor Red "!!! Error !!!"
         Write-Host -f Red "An error occurred: $_"
-        Write-Host -BackgroundColor Red "!!! Error !!!"
         $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "---------------------------------------------"
-        Add-Content -Path reportName $descrip
+        Add-Content -Path $reportName $descrip
     }
 }
 
@@ -132,5 +134,7 @@ foreach ($line in $lines) {
 
 # Termination Handling
 Register-EngineEvent PowerShell.Exiting -Action {
+    Write-Host "Closed"
     Set-ItemProperty -Path "HKCU:\SOFTWARE\SpotiDown" -Name "Iter" -Value $counter
+    Write-Host "Closed"
 }
