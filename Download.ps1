@@ -1,4 +1,8 @@
 param([Int32]$no = 1)
+if ([Int32]$no -le 1) {
+    Write-Host -ForegroundColor Red "Param Was Wrong..."
+    Exit
+}
 
 # Getting Details.csv
 Try {
@@ -32,20 +36,9 @@ $reportName = "Report_"+$timestamp+".txt"
 New-Item -ItemType File -Path $reportName -Force
 
 for($x=$no; $x -le $lines.length;$x++) {
-    $songDetails = $lines[$x-1]
+    $songDetails = $lines[([Int32]$x)-1]
 
     Write-Host -ForegroundColor Green -BackgroundColor White "------------------------------------------------------"
-    # $properties = $line | Get-Member -MemberType Properties
-    # $songDetails = New-Object -TypeName PSObject
-
-    # # Converting A CSV Row To PSObject
-    # for($i=0; $i -lt $properties.Count;$i++)
-    # {
-    #     $column = $properties[$i]
-    #     $columnvalue = $line | Select -ExpandProperty $column.Name
-    #     $songDetails | Add-Member -MemberType NoteProperty -Name $column.Name -Value $columnvalue
-    # }
-    
     try {
         $uri = 'https://api.spotifydown.com/download/' + $songDetails.'Spotify Track Id'
         $jsonResponse = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get -ErrorAction Stop
@@ -145,7 +138,7 @@ for($x=$no; $x -le $lines.length;$x++) {
         Write-Host -f Red "An error occurred: $_"
         $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "---------------------------------------------"
         Add-Content -Path $reportName $descrip
-        Remove-Item ".\Downloads\Audio $counter.mp3", ".\Downloads\Image $counter.jpg", ".\Downloads\out $counter.mp3"
+        Remove-Item ".\Downloads\Audio $counter.mp3", ".\Downloads\Image $counter.jpg", ".\Downloads\out $counter.mp3" -ErrorAction SilentlyContinue
     }
 }
 
