@@ -1,6 +1,18 @@
-param([Int32]$no = 1)
-if ([Int32]$no -le 1) {
+param(
+    [Int32]$sno = 1,
+    [Int32]$eno = 1
+)
+if (([Int32]$sno -lt 1) -Or ([Int32]$eno -lt 1)) {
     Write-Host -ForegroundColor Red "Param Was Wrong..."
+    Exit
+}
+
+function ErrorReportClose {
+    param (
+        [string]$message = ""
+    )
+    Write-Host -ForegroundColor Red $message
+    Write-Host -ForegroundColor Red "Terminating..."
     Exit
 }
 
@@ -9,20 +21,22 @@ Try {
     $filePath = "Details.csv"
     $lines = Import-csv -Path $filePath -ErrorAction Stop
 } Catch {
-    Write-Host -ForegroundColor Red "Details.csv Not Found"
-    Write-Host -ForegroundColor Red "Terminating..."
-    Exit
+    ErrorReportClose("Details.csv Not Found")
 }
 
+if ($eno -eq 1) { $eno = $lines.length }
+
 # Retriving Registry Variable
-Try {
-    $counter = (Get-ItemProperty -Path "HKCU:\SOFTWARE\SpotiDown" -ErrorAction Stop).Iter
-} Catch {
-    Write-Host "Catch"
-    $counter = 0
-    $RegPath = 'HKEY_CURRENT_USER\SOFTWARE\SpotiDown'
-    [microsoft.win32.registry]::SetValue($RegPath, 'Iter', $counter, [Microsoft.Win32.RegistryValueKind]::DWORD)
-}
+# Try {
+#     $counter = (Get-ItemProperty -Path "HKCU:\SOFTWARE\SpotiDown" -ErrorAction Stop).Iter
+# } Catch {
+#     Write-Host "Catch"
+#     $counter = 0
+#     $RegPath = 'HKEY_CURRENT_USER\SOFTWARE\SpotiDown'
+#     [microsoft.win32.registry]::SetValue($RegPath, 'Iter', $counter, [Microsoft.Win32.RegistryValueKind]::DWORD)
+# }
+
+$counter = 0
 
 # Setting Headers
 $headers = @{
@@ -34,8 +48,12 @@ $headers = @{
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $reportName = "Report_"+$timestamp+".txt"
 New-Item -ItemType File -Path $reportName -Force
+$timestampFD = Get-Date -Format "dd/MMM HH:mm:ss"
+$des = "Date :" + $timestampFD + "`n" + "Start :" + $sno + "`n"+ "End :" + $eno
+Add-Content -Path $reportName $des 
+Write-Host -BackgroundColor Cyan -ForegroundColor Blue $des
 
-for($x=$no; $x -le $lines.length;$x++) {
+for($x=$sno; $x -le $eno;$x++) {
     $songDetails = $lines[([Int32]$x)-1]
 
     Write-Host -ForegroundColor Green -BackgroundColor White "------------------------------------------------------"
@@ -44,9 +62,7 @@ for($x=$no; $x -le $lines.length;$x++) {
         $jsonResponse = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get -ErrorAction Stop
     }
     catch {
-        Write-Host -ForegroundColor Red "Oops Network Error"
-        Write-Host -ForegroundColor Red "Terminating..."
-        Exit
+        ErrorReportClose("Oops Network Error")
     }
 
     $status = $jsonResponse.'success'
@@ -60,9 +76,7 @@ for($x=$no; $x -le $lines.length;$x++) {
         try {
             $jsonResponse = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get -ErrorAction Stop
         } catch {
-            Write-Host -ForegroundColor Red "Oops Network Error"
-            Write-Host -ForegroundColor Red "Terminating..."
-            Exit
+            ErrorReportClose("Oops Network Error")
         }
     }
 
@@ -90,6 +104,8 @@ for($x=$no; $x -le $lines.length;$x++) {
 
     # Running FFMPEG
     $album_name = $songDetails.'Album'
+    $album_name = $album_name.Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
+    $album_name = $album_name.Substring(0, [System.Math]::Min(40, $album_name.Length))
     & ".\Tool\ffmpeg.exe" -i ".\Downloads\Audio $counter.mp3" -i ".\Downloads\Image $counter.jpg" -map 0:0 -map 1:0 -codec copy -id3v2_version 3 -metadata album=$album_name ".\Downloads\out $counter.mp3"
     
     # Running Check
@@ -147,8 +163,8 @@ for($x=$no; $x -le $lines.length;$x++) {
 # Handle The Report
 
 # Termination Handling
-Register-EngineEvent PowerShell.Exiting -Action {
-    Write-Host "Closed"
-    Set-ItemProperty -Path "HKCU:\SOFTWARE\SpotiDown" -Name "Iter" -Value $counter
-    Write-Host "Closed"
-}
+# Register-EngineEvent PowerShell.Exiting -Action {
+#     Write-Host "Closed"
+#     Set-ItemProperty -Path "HKCU:\SOFTWARE\SpotiDown" -Name "Iter" -Value $counter
+#     Write-Host "Closed"
+# }
