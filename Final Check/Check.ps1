@@ -1,3 +1,13 @@
+param(
+    [Int32]$sno = 1,
+    [Int32]$eno = 1
+)
+if (([Int32]$sno -lt 1) -Or ([Int32]$eno -lt 1)) {
+    Write-Host -ForegroundColor Red "Param Was Wrong..."
+    Exit
+}
+
+
 # Getting Details.csv
 Try {
     $filePath = ".\..\Details.csv"
@@ -8,6 +18,8 @@ Try {
     Exit
 }
 
+if ($eno -eq 1) { $eno = $csv.length }
+
 # Creating Report
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $reportName = "Report_"+$timestamp+".txt"
@@ -15,32 +27,33 @@ New-Item -ItemType File -Path $reportName -Force
 
 $counter = 0
 
-foreach($line in $csv)
+for($x=$sno; $x -le $eno;$x++)
 { 
-    $songDetails = $line
+    $songDetails = $csv[([Int32]$x)-1]
 
     Write-Host -ForegroundColor Green -BackgroundColor White "------------------------------------------------------"
         
     $counter++
 
     Write-Host "Item : "$counter
-    $songDetails = "Song : "+$songDetails.'Song'+", ID : " +$songDetails.'Spotify Track Id'
-    Write-Host $songDetails
+    $songDetail = "Song : "+$songDetails.'Song'+", ID : " +$songDetails.'Spotify Track Id'
+    Write-Host $songDetail
 
     try {
         $newnameWOExt = $songDetails.'Song'
         $cleanedFilename = $newnameWOExt.Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
         $artistname = $songDetails.'Artist' -split ",\s*"
         $cleanedartistname = $artistname[0].Split([IO.Path]::GetInvalidFileNameChars()) -join ' '
-        $newname = $cleanedartistname+" - "+ $cleanedFilename + '.mp3'
+        $newname = $cleanedartistname+" - "+ $cleanedFilename
         $limitnamechar = $newname.Substring(0, [System.Math]::Min(80, $newname.Length))
         $limitnamecharWExt = $limitnamechar + '.mp3'
 
-        $currentLocation = Get-Location
-        $currentLocation = Join-Path -Path $currentLocation -ChildPath "..\Downloads"
+        $currentLocation = Split-Path -Path (Get-Location).Path -Parent
+        $currentLocation = Join-Path -Path $currentLocation -ChildPath "Downloads"
         $objFolder = (New-Object -ComObject Shell.Application).NameSpace($currentLocation)
         $shellfile = $objFolder.parsename($limitnamecharWExt)
         $duration = $objFolder.GetDetailsOf($shellfile, 27) 
+        if ($duration -eq "Length") { throw "File Not Found!!!" }
         $MetaData = [PSCustomObject]@{
             Duration = $duration
         }
