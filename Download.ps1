@@ -49,7 +49,7 @@ $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $reportName = "Report_"+$timestamp+".txt"
 New-Item -ItemType File -Path $reportName -Force
 $timestampFD = Get-Date -Format "dd/MMM HH:mm:ss"
-$des = "Date :" + $timestampFD + "`n" + "Start :" + $sno + "`n"+ "End :" + $eno
+$des = "Date :" + $timestampFD + "`n" + "Start :" + $sno + "`n"+ "End :" + $eno + "`n" + "`n"
 Add-Content -Path $reportName $des 
 Write-Host -BackgroundColor Cyan -ForegroundColor Blue $des
 
@@ -97,7 +97,7 @@ for($x=$sno; $x -le $eno;$x++) {
     }
     catch {
         Write-Host -ForegroundColor Red "!!! Connection Closed !!!"
-        $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "---------------------------------------------"
+        $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "Command :" + "powershell -executionpolicy bypass -File '.\Download.ps1' -sno " + $x + " -eno " + $x + "`n"+ "---------------------------------------------"
         Add-Content -Path $reportName $descrip
         continue
     } 
@@ -154,7 +154,7 @@ for($x=$sno; $x -le $eno;$x++) {
     catch {
         Write-Host -ForegroundColor Red "!!! Error !!!"
         Write-Host -f Red "An error occurred: $_"
-        $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "---------------------------------------------"
+        $descrip = "Song :" + $songDetails.'Song' + "`n" + "Link :" + $songDetails.'Spotify Track Id' + "`n"+ "Command :" + "powershell -executionpolicy bypass -File '.\Download.ps1' -sno " + $x + " -eno " + $x + "`n"+ "---------------------------------------------"
         Add-Content -Path $reportName $descrip
         Remove-Item ".\Downloads\Audio $counter.mp3", ".\Downloads\Image $counter.jpg", ".\Downloads\out $counter.mp3" -ErrorAction SilentlyContinue
     }
