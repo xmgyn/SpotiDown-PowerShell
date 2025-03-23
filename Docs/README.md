@@ -1,8 +1,9 @@
+## Make Sure To Export Your Spotify Playlist In CSV And Name It 'Details.csv'
 
-# Spotidown-Powershell
+## Downloading Songs
+## Download : powershell -executionpolicy bypass -File '.\Download.ps1' -sno 0 -eno 0
 
-Spotify Downloader Using Powershell
+## Performing Final Check
+## Run Check : powershell -executionpolicy bypass -File '.\Check.ps1' -sno 0 -eno 0 | Out-File -FilePath 'Check - Summary.txt'
 
-![Doc Video](./Recording.mp4)
-
-<video src='./Recording.mp4' width=180/>
+## Your Final Downloaded Files Will Be Inside Downloads\FinalCheckOK
