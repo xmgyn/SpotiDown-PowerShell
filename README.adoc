@@ -1,0 +1,20 @@
+= Sample Document
+:doctype: article
+:toc: left
+:background-color: green
+
+== Highlights
+
+* This is the **first** bullet point.
+* Here’s the **second** bullet point.
+* And don’t forget the **third** one!
+
+== Embedded Video
+
+You can embed a video using an iframe or link. Here's an example:
+
+iframe::https://www.youtube.com/embed/dQw4w9WgXcQ[width="640",height="360",frameborder="0",allowfullscreen]
+
+== Bold Text Example
+
+Here is some **bold text** in the content for emphasis.
