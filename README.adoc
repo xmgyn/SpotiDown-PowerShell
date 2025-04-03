@@ -13,7 +13,7 @@
 
 You can embed a video using an iframe or link. Here's an example:
 
-iframe::https://www.youtube.com/embed/dQw4w9WgXcQ[width="640",height="360",frameborder="0",allowfullscreen]
+video::Docs/Recording.mp4[width="640",height="360"]
 
 == Bold Text Example
 
