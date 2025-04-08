@@ -1,19 +1,26 @@
 = SpotiDown - PowerShell
-:doctype: book
-:toc: middle
 
-== Highlights
+== Project Status
+(Completed)
 
-* This is the **first** bullet point.
-* Here’s the **second** bullet point.
-* And don’t forget the **third** one!
+== Features
 
-== Embedded Video
+== Technology Stack And Tools
 
-You can embed a video using an iframe or link. Here's an example:
+== Install/Execute
 
-video::Docs/Recording.mp4[width="640",height="360"]
+== Special Note
 
-== Bold Text Example
+== Common Issues
+Q: How do I...?
+A: Here's how...
 
-Here is some **bold text** in the content for emphasis.
+== Gallery
+
+== Contributing
+
+== License
+
+== Author
+
+**Mrigayan**
