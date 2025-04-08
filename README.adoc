@@ -1,7 +1,6 @@
-= Sample Document
-:doctype: article
-:toc: left
-:background-color: green
+= SpotiDown - PowerShell
+:doctype: book
+:toc: middle
 
 == Highlights
 
