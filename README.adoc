@@ -8,21 +8,24 @@ WARNING: The API Utilized In This Project Is No Longer Reliable, As It Now Deliv
 Completed
 --
 
+[.text-center]
 == Features
 
+[.text-center]
 == Technology Stack And Tools
 
+[.text-center]
 == Install/Execute
 
+[.text-center]
 == Special Note
 
 == Common Issues
+.How do I...?
 [%collapsible]
 ====
-This content is only revealed when the user clicks the block title.
+Here's how...
 ====
-Q: How do I...?
-A: Here's how...
 
 == Gallery
 
