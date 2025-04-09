@@ -29,9 +29,12 @@ WARNING: The API Utilized In This Project Is No Longer Reliable, As It Now Deliv
 
 .How do I...?
 [%collapsible]
+====
 ....
 Here's how...
 ....
+====
+
 '''
 
 == Gallery
@@ -49,4 +52,3 @@ Here's how...
 == Author
 
 **Mrigayan**
-'''
