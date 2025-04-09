@@ -1,7 +1,12 @@
 = SpotiDown - PowerShell
 
+WARNING: The API Utilized In This Project Is No Longer Reliable, As It Now Delivers Audio Chunks Instead Of Complete Songs. Furthermore, The API Structure Underwent Significant Changes, Introducing Token-based Authentication. Consequently, This Project Is No Longer Functional Under The Updated API Framework.
+
 == Project Status
-(Completed)
+[source]
+--
+Completed
+--
 
 == Features
 
@@ -12,6 +17,10 @@
 == Special Note
 
 == Common Issues
+[%collapsible]
+====
+This content is only revealed when the user clicks the block title.
+====
 Q: How do I...?
 A: Here's how...
 
