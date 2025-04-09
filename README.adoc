@@ -3,10 +3,10 @@
 WARNING: The API Utilized In This Project Is No Longer Reliable, As It Now Delivers Audio Chunks Instead Of Complete Songs. Furthermore, The API Structure Underwent Significant Changes, Introducing Token-based Authentication. Consequently, This Project Is No Longer Functional Under The Updated API Framework.
 
 == Project Status
-[source]
---
-Completed
---
+====
+*Completed*
+====
+'''
 
 [.text-center]
 == Features
@@ -20,19 +20,26 @@ Completed
 [.text-center]
 == Special Note
 
+[.text-center]
 == Common Issues
 .How do I...?
 [%collapsible]
 ====
+....
 Here's how...
+....
 ====
 
+[.text-center]
 == Gallery
 
+[.text-center]
 == Contributing
 
+[.text-center]
 == License
 
+[.text-center]
 == Author
 
 **Mrigayan**
