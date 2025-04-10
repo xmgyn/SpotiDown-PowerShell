@@ -79,8 +79,10 @@ sno And eno Are Not Correctly Configured
 == Gallery
 
 ====
-image::./Docs/1.jpg[] 
-image::./Docs/2.jpg[] 
+image::./Docs/1.jpg[]
+****
+image::./Docs/2.jpg[]
+****
 image::./Docs/3.jpg[] 
 ====
 
