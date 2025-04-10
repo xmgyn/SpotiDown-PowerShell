@@ -35,7 +35,7 @@ Completed
 
 == Install/Execute
 
-TIP: Walkthrough Video Is Provided Inside #Docs# Folder
+TIP: Walkthrough Video Is Provided Inside Docs Folder
 
 . Extract FFMpeg From #Tool# Folder And Paste It There Itself
 . Make Sure To Export Your Spotify Playlist In CSV And Rename It #Details.csv#
@@ -70,7 +70,7 @@ Keep Restarting The Program Until Optimal Download Speed Is Achieved
 [%collapsible]
 ====
 ....
-#sno# And #eno# Are Not Correctly Configured
+sno And eno Are Not Correctly Configured
 ....
 ====
 
@@ -78,9 +78,11 @@ Keep Restarting The Program Until Optimal Download Speed Is Achieved
 
 == Gallery
 
-image::./Docs/1.jpg[width=128, height=128] 
-image::./Docs/2.jpg[width=128, height=128] 
-image::./Docs/3.jpg[width=128, height=128] 
+====
+image::./Docs/1.jpg[] 
+image::./Docs/2.jpg[] 
+image::./Docs/3.jpg[] 
+====
 
 '''
 
